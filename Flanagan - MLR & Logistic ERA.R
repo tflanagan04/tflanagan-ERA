@@ -155,6 +155,8 @@ RSE_4
 
 # FIFTH MODEL - 2015 cut off with updates
 # Using the same numerical field and index
+
+# Home runs subtracted from hits so HR is not double counted
 data_num_2015_clean$H_minus_HR <- data_num_2015_clean$H - data_num_2015_clean$HR
 index_5 <- sample(1:nrow(data_num_2015_clean), 0.7 * nrow(data_num_2015_clean))
 
@@ -202,6 +204,7 @@ sixth_pred <- factor(sixth_class, levels = c(0, 1))
 sixth_results <- data.frame(Prob_lessthan = round(p_lessthan, 3), Predicted = sixth_pred, Actual = test_5$ERA)
 head(sixth_results, 25)
 
+# 2x2 confusion matrix displaying true positives, true negatives, false positives, and false negatives
 cm <- table(Actual = test_5$ERA_under_4, Predicted = sixth_pred)
 cm
 
@@ -258,4 +261,5 @@ round(accuracy, 4)
 # important gets across and we can also see what other metrics actually matter.
 
 # FINAL TAKEAWAY:
+
 # Just because a pitcher controls everything they can well does not mean they will have success.
