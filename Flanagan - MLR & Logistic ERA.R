@@ -37,29 +37,32 @@ nrow(data_num_2000)
 nrow(data_num_2015)
 
 # Splitting up data
-# FIRST MODEL --- using the entire data set
+# FIRST MODEL - using the entire data set (1871-2024)
 set.seed(123)
 
 # Cleaning data (there were 86 HBP nulls and 8 HR nulls)
 data_num_clean <- data_num[complete.cases(data_num[, c("SO", "BB", "HBP", "HR")]), ]
 
+# 70% of the data into training split, 30% to the testing split
 index <- sample(1:nrow(data_num_clean), 0.7 * nrow(data_num_clean))
-
 train <- data_num_clean[index, ]
 test <- data_num_clean[-index, ]
 
 nrow(train)
 nrow(test)
 
+# Training model using the four metrics and its descriptive summary
 first_model <- lm(ERA ~ SO + BB + HBP + HR, data = train)
 summary(first_model)
 
+# Displays the testing results with quartiles and more info
 first_pred <- predict(first_model, newdata = test)
 summary(first_pred)
 
 # Calculating residuals
 first_residuals <- test$ERA - first_pred
 
+# Displaying actual and predicted values along with the differences (residuals)
 first_results <- data.frame(Actual = test$ERA, Predicted = first_pred, Residual = first_residuals)
 head(first_results, 10)
 
@@ -67,7 +70,7 @@ head(first_results, 10)
 RSE <- sqrt(mean((test$ERA - first_pred)^2, na.rm=TRUE))
 RSE
 
-# SECOND MODEL --- 1977 cut off
+# SECOND MODEL - 1977 cut off (1977-2024)
 set.seed(123)
 data_num_1977_clean <- data_num_1977[complete.cases(data_num_1977[, c("SO", "BB", "HBP", "HR")]), ]
 index_2 <- sample(1:nrow(data_num_1977_clean), 0.7 * nrow(data_num_1977_clean))
@@ -94,7 +97,7 @@ head(second_results, 10)
 RSE_2 <- sqrt(mean((test_2$ERA - second_pred)^2, na.rm=TRUE))
 RSE_2
 
-# THIRD MODEL - 2000 cut off
+# THIRD MODEL - 2000 cut off (2000-2024)
 set.seed(123)
 data_num_2000_clean <- data_num_2000[complete.cases(data_num_2000[, c("SO", "BB", "HBP", "HR")]), ]
 index_3 <- sample(1:nrow(data_num_2000_clean), 0.7 * nrow(data_num_2000_clean))
@@ -120,7 +123,7 @@ head(third_results, 10)
 RSE_3 <- sqrt(mean((test_3$ERA - third_pred)^2, na.rm=TRUE))
 RSE_3
 
-# FOURTH MODEL - 2015 cut off
+# FOURTH MODEL - 2015 cut off (2015-2024)
 set.seed(123)
 data_num_2015_clean <- data_num_2015[complete.cases(data_num_2015[, c("SO", "BB", "HBP", "HR")]), ]
 index_4 <- sample(1:nrow(data_num_2015_clean), 0.7 * nrow(data_num_2015_clean))
@@ -153,7 +156,7 @@ RSE_4
 # explains 51.97% of the variation in ERA. This makes sense because there are outside
 # factors that affect ERA output. Now, let's try and find what outside factors are most important.
 
-# FIFTH MODEL - 2015 cut off with updates
+# FIFTH MODEL - 2015 cut off with updates (2015-2024)
 # Using the same numerical field and index
 
 # Home runs subtracted from hits so HR is not double counted
@@ -189,11 +192,13 @@ head(fifth_results, 10)
 RSE_5 <- sqrt(mean((test_5$ERA - fifth_pred)^2, na.rm=TRUE))
 RSE_5
 
-# SIXTH MODEL - Logistic Regression
+# SIXTH MODEL - Logistic Regression (2015-2024)
 
+# Saying that our "1" or "positive" outcome is an ERA less than 4.00 since lower ERA is better
 train_5$ERA_under_4 <- ifelse(train_5$ERA < 4, 1, 0)
 test_5$ERA_under_4 <- ifelse(test_5$ERA < 4, 1, 0)
 
+# Creating model with parameters of previous model but with logistic framework instead of MLR
 logistic_model <- glm(ERA_under_4 ~ SO + BB + HBP + HR + H_minus_HR + BAOpp, data = train_5, family = 'binomial')
 summary(logistic_model)
 
@@ -255,11 +260,10 @@ round(accuracy, 4)
 # This was to communicate how the importance of these metrics have been stressed
 # through the years. For example, in 1924, only 2 pitchers recorded more than 100 strikeouts
 # while in 2024, 8 recorded more than 200 strikeouts. The values show that as we get into
-# the Statcast Era (and eventually into it) these metrics have stronger ties to ERA output. 
+# the Statcast Era these metrics have stronger ties to ERA output. 
 # However, the final model could not only have a .5197 adjusted r-squared value, so hits
 # and BAOpp were added. This way, the message of what a pitcher can control being more 
-# important gets across and we can also see what other metrics actually matter.
+# important gets across and we can also see what other metrics add predictive value.
 
 # FINAL TAKEAWAY:
-
-# Just because a pitcher controls everything they can well does not mean they will have success.
+# With evidence, just because a pitcher controls everything they can well does not mean they will have success.
